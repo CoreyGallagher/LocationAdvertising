@@ -100,7 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             ActivityCompat.requestPermissions( this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1 );
         }
         else{
-            locationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 5, 5, locationListener );
+            locationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 5, 0, locationListener );
 
             Location lastKnownLocation = locationManager.getLastKnownLocation( LocationManager.GPS_PROVIDER );
 

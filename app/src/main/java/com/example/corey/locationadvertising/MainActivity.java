@@ -16,6 +16,7 @@ import com.amazonaws.mobile.client.AWSStartupHandler;
 import com.amazonaws.mobile.client.AWSStartupResult;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 
 
 
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+      //  AWSMobileClient.getInstance().initialize(this).execute();
+
        /* AWSMobileClient.getInstance().initialize(this, new AWSStartupHandler() {
             @Override
             public void onComplete(final AWSStartupResult awsStartupResult) {
@@ -58,14 +61,8 @@ public class MainActivity extends AppCompatActivity {
         }).execute();
         */
 
-
-
         //Cognito default config
       //  ClientConfiguration clientConfiguration = new ClientConfiguration( );
-
-
-
-
 
         // userPool.signUpInBackground(  );
 

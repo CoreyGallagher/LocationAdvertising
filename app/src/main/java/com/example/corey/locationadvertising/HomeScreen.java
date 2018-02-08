@@ -23,4 +23,10 @@ public class HomeScreen extends AppCompatActivity {
         Intent intent = new Intent( HomeScreen.this, MapsActivity.class );
         startActivity( intent );
     }
+
+    public void openOffers(View view) {
+        Toast.makeText( HomeScreen.this, "Offers",Toast.LENGTH_SHORT ).show();
+        Intent intent = new Intent( HomeScreen.this, OffersActivity.class );
+        startActivity( intent );
+    }
 }
