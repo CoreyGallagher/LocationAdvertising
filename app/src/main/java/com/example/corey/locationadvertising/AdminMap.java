@@ -42,12 +42,14 @@ import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
 
 import java.util.Random;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks,
+public class AdminMap extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener{
 
     private GoogleMap mMap;
+
+
+
 
     //play services location
     private static final int MY_PERMISSION_REQUEST_CODE = 2897;
@@ -61,37 +63,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static int FASTEST_INTERVAL = 5000;
     private static int DISPLACEMENT = 5000;
 
-    VerticalSeekBar verticalSeekBar;
-    float i;
-
     DatabaseReference ref;
     GeoFire geoFire;
     Marker CurrentLocation;
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode)
-        {
-        case MY_PERMISSION_REQUEST_CODE:
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                if(checkPlayServices())
-                {
-                    buildGoogleApiClient();
-                    createLocationRequest();
-                    displayLocation();
-                }
-
-            }
-            break;
-        }
-
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
-        setContentView( R.layout.activity_maps );
+        setContentView( R.layout.activity_admin_map );
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById( R.id.map );
@@ -101,39 +80,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         geoFire = new GeoFire(ref);
         setUpLocation();
 
-        verticalSeekBar = (VerticalSeekBar) findViewById( R.id.vertcalSeekBar );
-        verticalSeekBar.setOnSeekBarChangeListener( new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                mMap.animateCamera( CameraUpdateFactory.zoomTo(progress),2000,null );
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        } );
     }
 
 
 
     private void setUpLocation() {
-        if(ActivityCompat.checkSelfPermission( this, Manifest.permission.ACCESS_COARSE_LOCATION )!= PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission( this, Manifest.permission.ACCESS_FINE_LOCATION )!= PackageManager.PERMISSION_GRANTED)
+        if(ActivityCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION )!= PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION )!= PackageManager.PERMISSION_GRANTED)
         {
             //Request runtime permission
             ActivityCompat.requestPermissions( this,new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
             },MY_PERMISSION_REQUEST_CODE);
-            }
-            else
+        }
+        else
         {
             if(checkPlayServices())
             {
@@ -145,7 +106,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void displayLocation() {
-        if(ActivityCompat.checkSelfPermission( this, Manifest.permission.ACCESS_COARSE_LOCATION )!= PackageManager.PERMISSION_GRANTED &&
+        if(ActivityCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION )!= PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission( this, Manifest.permission.ACCESS_FINE_LOCATION )!= PackageManager.PERMISSION_GRANTED)
         {
             return;
@@ -165,8 +126,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             if (CurrentLocation != null)
                                 CurrentLocation.remove();//remove old marker
                             CurrentLocation = mMap.addMarker( new MarkerOptions()
-                                                        .position( new LatLng( latitude,longitude ) )
-                                                        .title( "You" )) ;
+                                    .position( new LatLng( latitude,longitude ) )
+                                    .title( "You" )) ;
 
                             //move camera to this position
                             mMap.animateCamera( CameraUpdateFactory.newLatLngZoom(new LatLng( latitude,longitude ), 8f));
@@ -213,100 +174,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
     }
 
-    public void populateGeofenceList(){
-       // for(mMap.Entry<String, LatLng> entry)
-    }
 
-    //Manipulates the map once available.
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        //create a geofence
-        LatLng geofence = new LatLng( 54.9524, -7.7209 );
-        mMap.addCircle( new CircleOptions()
-                    .center( geofence )
-                    .radius( 350 )
-                    .strokeColor( Color.BLUE )
-                    .fillColor( 0x220000FF )
-                    .strokeWidth( 5.0f )
-        );
-
-        //add GeoQuery
-        //0.5f = 0.5km
-        GeoQuery geoQuery = geoFire.queryAtLocation( new GeoLocation( geofence.latitude,geofence.longitude ),0.5f );
-        geoQuery.addGeoQueryEventListener( new GeoQueryEventListener() {
-            @Override
-            public void onKeyEntered(String key, GeoLocation location) {
-                sendNotification("MAPS", String.format("%s Welcome to LYIT", key));
-            }
-
-            @Override
-            public void onKeyExited(String key) {
-                sendNotification("MAPS", String.format("%s Leaving LYIT", key));
-
-            }
-
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-                Log.e("ERROR",""+error);
-            }
-        } );
-
-    }
-
-    private void sendNotification(String title, String content) {
-        Notification.Builder builder = new Notification.Builder( this )
-                .setSmallIcon( R.mipmap.ic_launcher_round )
-                .setContentTitle( title )
-                .setContentText(content);
-        NotificationManager Manager = (NotificationManager)this.getSystemService( Context.NOTIFICATION_SERVICE );
-        Intent intent = new Intent (this,MapsActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_IMMUTABLE);
-        builder.setContentIntent( contentIntent );
-        Notification notification = builder.build();
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.defaults |= Notification.DEFAULT_SOUND;
-
-        Manager.notify(new Random().nextInt(),notification);
-    }
-
-
-    @Override
-    public void onLocationChanged(Location location) {
-        mLastLocation = location;
-        displayLocation();
-    }
-
-
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-
-    public void onProviderEnabled(String provider) {
-
-    }
-
-
-    public void onProviderDisabled(String provider) {
-
+        // Add a marker in Sydney and move the camera
+        LatLng sydney = new LatLng( -34, 151 );
+        mMap.addMarker( new MarkerOptions().position( sydney ).title( "Marker in Sydney" ) );
+        mMap.moveCamera( CameraUpdateFactory.newLatLng( sydney ) );
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-            displayLocation();
-            startLocationUpdates();
+        displayLocation();
+        startLocationUpdates();
     }
 
     private void startLocationUpdates() {
@@ -315,16 +206,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         {
             return;
         }
-        LocationServices.FusedLocationApi.requestLocationUpdates( mGoogleApiClient, mLocationRequest,this );
+        LocationServices.FusedLocationApi.requestLocationUpdates( mGoogleApiClient, mLocationRequest, this );
     }
-
     @Override
     public void onConnectionSuspended(int i) {
-        mGoogleApiClient.connect();
+
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+        displayLocation();
     }
 }

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "88070231207",
+    "firebase_url": "https://locationadvertising-f77b4.firebaseio.com",
+    "project_id": "locationadvertising-f77b4",
+    "storage_bucket": "locationadvertising-f77b4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:88070231207:android:ecd16dad16cb7632",
+        "android_client_info": {
+          "package_name": "com.example.corey.locationadvertising"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "88070231207-r3djt86jqob4062l57bgrofmrdc1rmvh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.corey.locationadvertising",
+            "certificate_hash": "c097303ea1973182db31d4c381a569cad86183ab"
+          }
+        },
+        {
+          "client_id": "88070231207-ds8neadbk7n934r09cbq6dne10q0e6g5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8VcuNJ1mn7qBE3XGQMiuI7AOZvpSJumQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "88070231207-ds8neadbk7n934r09cbq6dne10q0e6g5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

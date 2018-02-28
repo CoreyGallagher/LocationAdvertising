@@ -29,4 +29,10 @@ public class HomeScreen extends AppCompatActivity {
         Intent intent = new Intent( HomeScreen.this, OffersActivity.class );
         startActivity( intent );
     }
+
+    public void openAdmin(View view) {
+        Toast.makeText( HomeScreen.this, "Admin",Toast.LENGTH_SHORT ).show();
+        Intent intent = new Intent( HomeScreen.this, AdminActivity.class );
+        startActivity( intent );
+    }
 }
