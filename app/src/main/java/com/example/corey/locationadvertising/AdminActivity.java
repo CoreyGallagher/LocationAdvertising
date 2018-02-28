@@ -14,6 +14,11 @@ public class AdminActivity extends AppCompatActivity {
 
     public static double Adminlatitude =0;
     public static double Adminlongitude =0;
+    public static String Title;
+    public static String Body;
+
+    EditText notificationBody;
+    EditText notificationTitle;
     EditText latitudeText;
     EditText longitudeText;
 
@@ -25,6 +30,8 @@ public class AdminActivity extends AppCompatActivity {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_admin );
 
+        notificationTitle = (EditText)findViewById( R.id.TitleText );
+        notificationBody = (EditText)findViewById( R.id.BodyText );
         latitudeText = (EditText)findViewById( R.id.latitudeText );
         longitudeText = (EditText)findViewById( R.id.longitudeText );
 
@@ -34,6 +41,8 @@ public class AdminActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Adminlatitude = Double.valueOf( latitudeText.getText().toString());
                 Adminlongitude = Double.valueOf( longitudeText.getText().toString());
+                Title = notificationTitle.getText().toString();
+                Body = notificationBody.getText().toString();
 
                 showToast( String.valueOf( Adminlatitude ) );
                 showToast( String.valueOf( Adminlongitude ) );

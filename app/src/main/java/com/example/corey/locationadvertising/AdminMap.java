@@ -130,7 +130,7 @@ public class AdminMap extends FragmentActivity implements OnMapReadyCallback,Goo
                                     .title( "You" )) ;
 
                             //move camera to this position
-                            mMap.animateCamera( CameraUpdateFactory.newLatLngZoom(new LatLng( latitude,longitude ), 8f));
+                            mMap.animateCamera( CameraUpdateFactory.newLatLngZoom(new LatLng( latitude,longitude), 8f));
                         }
                     } );
 
@@ -174,24 +174,68 @@ public class AdminMap extends FragmentActivity implements OnMapReadyCallback,Goo
         return true;
     }
 
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng( -34, 151 );
-        mMap.addMarker( new MarkerOptions().position( sydney ).title( "Marker in Sydney" ) );
-        mMap.moveCamera( CameraUpdateFactory.newLatLng( sydney ) );
+        //create a geofence
+        LatLng geofence = new LatLng( AdminActivity.Adminlatitude, AdminActivity.Adminlongitude );
+        mMap.addCircle( new CircleOptions()
+                .center( geofence )
+                .radius( 200 )
+                .strokeColor( Color.BLUE )
+                .fillColor( 0x220000FF )
+                .strokeWidth( 5.0f )
+        );
+
+        //add GeoQuery
+        //0.5f = 0.5km
+        GeoQuery geoQuery = geoFire.queryAtLocation( new GeoLocation( geofence.latitude,geofence.longitude ),0.2f );
+        geoQuery.addGeoQueryEventListener( new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                sendNotification(""+AdminActivity.Title, String.format(""+AdminActivity.Body, key));
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                sendNotification("MAPS", String.format("%s Left Zone", key));
+
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                Log.e("ERROR",""+error);
+            }
+        } );
+
+
+    }
+
+    private void sendNotification(String title, String content) {
+        Notification.Builder builder = new Notification.Builder( this )
+                .setSmallIcon( R.mipmap.ic_launcher_round )
+                .setContentTitle( title )
+                .setContentText(content);
+        NotificationManager Manager = (NotificationManager)this.getSystemService( Context.NOTIFICATION_SERVICE );
+        Intent intent = new Intent (this,MapsActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_IMMUTABLE);
+        builder.setContentIntent( contentIntent );
+        Notification notification = builder.build();
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        notification.defaults |= Notification.DEFAULT_SOUND;
+
+        Manager.notify(new Random().nextInt(),notification);
     }
 
     @Override
