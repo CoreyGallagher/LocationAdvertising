@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -35,11 +36,21 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
@@ -62,11 +73,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static int DISPLACEMENT = 5000;
 
     VerticalSeekBar verticalSeekBar;
-    float i;
-
     DatabaseReference ref;
     GeoFire geoFire;
     Marker CurrentLocation;
+    Marker Business;
+
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -156,7 +169,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             final double latitude = mLastLocation.getLatitude();
             final double longitude = mLastLocation.getLongitude();
 
-            //update to fierbase
+            //update to firebase
             geoFire.setLocation( "You", new GeoLocation( latitude, longitude ),
                     new GeoFire.CompletionListener() {
                         @Override
@@ -169,7 +182,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                         .title( "You" )) ;
 
                             //move camera to this position
-                            mMap.animateCamera( CameraUpdateFactory.newLatLngZoom(new LatLng( latitude,longitude ), 8f));
+                            mMap.animateCamera( CameraUpdateFactory.newLatLngZoom(new LatLng( latitude,longitude ), 15f));
                         }
                     } );
 
@@ -213,55 +226,69 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
     }
 
-    public void populateGeofenceList(){
-       // for(mMap.Entry<String, LatLng> entry)
-    }
-
     //Manipulates the map once available.
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        //create a geofence
-        LatLng geofence = new LatLng( 54.9524, -7.7209 );
-        mMap.addCircle( new CircleOptions()
-                    .center( geofence )
-                    .radius( 350 )
-                    .strokeColor( Color.BLUE )
-                    .fillColor( 0x220000FF )
-                    .strokeWidth( 5.0f )
-        );
+        //Read information from database
+        Task<QuerySnapshot> querySnapshotTask = FirebaseFirestore.getInstance().collection( "NotificationData" )
+                .get()
+                .addOnCompleteListener( new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                Log.d( "DOCUMENT", document.getId() + " => " + document.getData() );
+                                Log.i("TITLE SEARCH", ""+document.getData().get( "Title" ));
+                                Log.i("BODY SEARCH", ""+document.getData().get( "Body" ));
+                                Log.i("GEO-POINT", ""+document.getData().get( "LAT_LNG" ));
+                                final String Title = String.valueOf( document.getData().get( "Title" ) );
+                                final String Body = String.valueOf( document.getData().get( "Body" ) );
+                                final GeoPoint Ref = (GeoPoint) document.getData().get( "LAT_LNG" );
+                                final double lat = Ref.getLatitude();
+                                final double lng = Ref.getLongitude();
 
-        //add GeoQuery
-        //0.5f = 0.5km
-        GeoQuery geoQuery = geoFire.queryAtLocation( new GeoLocation( geofence.latitude,geofence.longitude ),0.5f );
-        geoQuery.addGeoQueryEventListener( new GeoQueryEventListener() {
-            @Override
-            public void onKeyEntered(String key, GeoLocation location) {
-                sendNotification("MAPS", String.format("%s Welcome to LYIT", key));
-            }
+                                //create geoQuery based on data retrieved
+                                mMap.addMarker( new MarkerOptions()
+                                        .position( new LatLng( lat,lng ) )
+                                        .title( document.getId() )) ;
+                                GeoQuery geoQuery;
+                                geoQuery = geoFire.queryAtLocation( new GeoLocation( lat,lng ),0.15f );
+                                geoQuery.addGeoQueryEventListener( new GeoQueryEventListener() {
+                                    @Override
+                                    public void onKeyEntered(String key, GeoLocation location) {
+                                        sendNotification(Title, String.format(Body, key));
+                                    }
 
-            @Override
-            public void onKeyExited(String key) {
-                sendNotification("MAPS", String.format("%s Leaving LYIT", key));
+                                    @Override
+                                    public void onKeyExited(String key) {
+                                        //sendNotification("MAPS", String.format("%s Leaving LYIT", key));
 
-            }
+                                    }
 
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
+                                    @Override
+                                    public void onKeyMoved(String key, GeoLocation location) {
 
-            }
+                                    }
 
-            @Override
-            public void onGeoQueryReady() {
+                                    @Override
+                                    public void onGeoQueryReady() {
 
-            }
+                                    }
 
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-                Log.e("ERROR",""+error);
-            }
-        } );
+                                    @Override
+                                    public void onGeoQueryError(DatabaseError error) {
+                                        Log.e("ERROR",""+error);
+                                    }
+                                } );
+
+                            }
+                        } else {
+                            Log.d( "DOCUMENT", "Error getting documents: ", task.getException() );
+                        }
+                    }
+                } );
 
     }
 
@@ -281,13 +308,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Manager.notify(new Random().nextInt(),notification);
     }
 
-
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
         displayLocation();
     }
-
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
 
@@ -307,6 +332,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onConnected(@Nullable Bundle bundle) {
             displayLocation();
             startLocationUpdates();
+
     }
 
     private void startLocationUpdates() {
@@ -327,4 +353,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
 }

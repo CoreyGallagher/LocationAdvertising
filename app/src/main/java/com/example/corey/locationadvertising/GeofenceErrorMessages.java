@@ -26,7 +26,7 @@ class GeofenceErrorMessages {
         if (e instanceof ApiException) {
             return getErrorString(context, ((ApiException) e).getStatusCode());
         } else {
-            return String.valueOf( Log.d("Error","Some Error") );
+            return context.getResources().getString(R.string.unknown_geofence_error);
         }
     }
 
@@ -37,13 +37,13 @@ class GeofenceErrorMessages {
         Resources mResources = context.getResources();
         switch (errorCode) {
             case GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE:
-                return String.valueOf( Log.d("Error","Geofence not available") );
+                return mResources.getString(R.string.geofence_not_available);
             case GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES:
-                return String.valueOf( Log.d("Error","Too many geofences") );
+                return mResources.getString(R.string.geofence_too_many_geofences);
             case GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS:
-                return String.valueOf( Log.d("Error","Too mnay pending intents") );
+                return mResources.getString(R.string.geofence_too_many_pending_intents);
             default:
-                return String.valueOf( Log.d("Error","Something wrong") );
+                return mResources.getString(R.string.unknown_geofence_error);
         }
     }
 }

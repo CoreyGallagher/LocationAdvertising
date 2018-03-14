@@ -4,6 +4,7 @@ package com.example.corey.locationadvertising;
  * Created by corey on 28/02/2018.
  */
 
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -17,12 +18,14 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Listener for geofence transition changes.
@@ -76,7 +79,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     triggeringGeofences);
 
             // Send notification and log the transition details.
-            sendNotification(geofenceTransitionDetails);
+            sendNotification();
             Log.i(TAG, geofenceTransitionDetails);
         } else {
             // Log the error.
@@ -95,7 +98,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             int geofenceTransition,
             List<Geofence> triggeringGeofences) {
 
-        String geofenceTransitionString = String.valueOf( getTransitionString(geofenceTransition) );
+        String geofenceTransitionString = getTransitionString(geofenceTransition);
 
         // Get the Ids of each geofence that was triggered.
         ArrayList<String> triggeringGeofencesIdsList = new ArrayList<>();
@@ -111,7 +114,10 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
      * Posts a notification in the notification bar when a transition is detected.
      * If the user clicks the notification, control goes to the MainActivity.
      */
-    private void sendNotification(String notificationDetails) {
+    private void sendNotification(){
+        Toast.makeText(GeofenceTransitionsJobIntentService.this, "WELCOME", Toast.LENGTH_SHORT).show();
+    }
+    /*  private void sendNotification(String notificationDetails) {
         // Get an instance of the Notification manager
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -147,14 +153,14 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
         // Define the notification settings.
-        builder.setSmallIcon(R.mipmap.ic_launcher)
+        builder.setSmallIcon(R.drawable.ic_launcher_foreground)
                 // In a real app, you may want to use a library like Volley
                 // to decode the Bitmap.
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(),
-                        R.mipmap.ic_launcher))
+                        R.drawable.ic_launcher_foreground))
                 .setColor(Color.RED)
                 .setContentTitle(notificationDetails)
-                .setContentText("Error")
+                .setContentText(getString(R.string.geofence_transition_notification_text))
                 .setContentIntent(notificationPendingIntent);
 
         // Set the Channel ID for Android O.
@@ -167,7 +173,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
         // Issue the notification
         mNotificationManager.notify(0, builder.build());
-    }
+    }*/
 
     /**
      * Maps geofence transition types to their human-readable equivalents.
@@ -175,14 +181,14 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
      * @param transitionType    A transition type constant defined in Geofence
      * @return                  A String indicating the type of transition
      */
-    private int getTransitionString(int transitionType) {
+    private String getTransitionString(int transitionType) {
         switch (transitionType) {
             case Geofence.GEOFENCE_TRANSITION_ENTER:
-                return Log.d("Enter","Welcome");
+                return getString(R.string.geofence_transition_entered);
             case Geofence.GEOFENCE_TRANSITION_EXIT:
-                return Log.d("Exit","Goodbye");
+                return getString(R.string.geofence_transition_exited);
             default:
-                return Log.d("Error","Something Wrong");
+                return getString(R.string.unknown_geofence_transition);
         }
     }
 }
